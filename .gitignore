@@ -51,7 +51,6 @@ logs/
 
 # Local reports / generated output
 reports/
-*.html
 *.jsonl
 
 # Local databases
