@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nayvista-shield"
+version = "1.0.0"
+description = "NayVista Shield - AI-Assisted Web Security Assessment"
+readme = "README.md"
+authors = [{ name = "NayVista Technologies" }]
+dependencies = [
+    "httpx>=0.28.0",
+    "beautifulsoup4>=4.13.0",
+    "rich>=13.0.0"
+]
+requires-python = ">=3.10"
+
+[project.scripts]
+shield = "scanner.cli:main"
+nayvista-shield = "scanner.cli:main"
+nshield = "scanner.cli:main"
+sentinelscan = "scanner.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["scanner*"]

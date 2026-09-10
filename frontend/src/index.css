@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  background-color: #000000;
+  color: #FFF8DB;
+  background-image: radial-gradient(rgba(255, 212, 0, 0.035) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+/* Custom terminal scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #050505;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #26200A;
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #FFD400;
+}
+
+/* Subtle yellow glow classes */
+.glow-yellow {
+  box-shadow: 0 0 20px rgba(255, 212, 0, 0.15);
+}
+
+.glow-yellow-sm {
+  box-shadow: 0 0 10px rgba(255, 212, 0, 0.08);
+}
+
+.glow-yellow-border {
+  border-color: #FFD400;
+  box-shadow: 0 0 12px rgba(255, 212, 0, 0.2);
+}
+
+/* Terminal cursor blink */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.animate-cursor-blink {
+  animation: blink 1s infinite;
+}

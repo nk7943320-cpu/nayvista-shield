@@ -1,0 +1,969 @@
+<USER_REQUEST>
+NAYVISTA SHIELD
+WEB SCAN "INITIALIZING..." HANG
+MASTER INVESTIGATION PROMPT
+============================================================
+
+ROLE:
+You are investigating a production-style web assessment application
+called NayVista Shield.
+
+IMPORTANT:
+THIS IS AN INVESTIGATION-ONLY TASK.
+
+DO NOT IMPLEMENT ANY FIX YET.
+
+Do not rewrite the scanner.
+Do not rewrite Active modules.
+Do not remove security controls.
+Do not add exploit functionality.
+
+Your job is to reproduce, trace, compare, identify the FIRST broken
+component, determine the root cause, and provide a minimal safe fix plan.
+
+============================================================
+1. CURRENT VERIFIED STATUS
+============================================================
+
+The following facts are confirmed:
+
+A. TERMINAL — DEFENSIVE / SAFE
+   ✅ VERIFIED WORKING.
+
+B. TERMINAL — ACTIVE / AUTHORIZED TESTING
+   ⚠️ NOT YET VERIFIED.
+   Do NOT assume it works.
+   Do NOT report it as working unless actually tested.
+
+C. WEB GUI — DEFENSIVE / SAFE
+   ❌ Gets stuck indefinitely at:
+
+      Initializing...
+
+D. WEB GUI — ACTIVE / AUTHORIZED TESTING
+   ❌ Also gets stuck at:
+
+      Initializing...
+
+Therefore the primary investigation target is:
+
+    WHY DOES THE WEB GUI REMAIN AT "INITIALIZING..."?
+
+The strongest known-good baseline is:
+
+    TERMINAL → DEFENSIVE → WORKS
+
+The strongest broken baseline is:
+
+    WEB → DEFENSIVE → INITIALIZING FOREVER
+
+Use this comparison FIRST.
+
+============================================================
+2. ACTIVE / AUTHORIZED TESTING CONTEXT
+============================================================
+
+NayVista Shield supports:
+
+[01] DEFENSIVE / SAFE
+
+[02] ACTIVE / AUTHORIZED TESTING
+
+Active mode is intended for bounded, authorized, non-destructive
+security validation.
+
+Current Active description:
+
+ACTIVE / AUTHORIZED TESTING [ACTIVE]
+
+Bounded active validation:
+- HTTP behavior
+- TLS strength
+- CORS
+- API security
+- authentication review
+- access-control validation
+- infrastructure exposure validation
+
+Properties:
+- non-destructive
+- rate-governed
+- bounded
+- auditable
+- evidence-based
+
+Active mode must NOT be treated as unrestricted attack mode.
+
+Do not add:
+- exploit payloads
+- credential attacks
+- brute force
+- destructive requests
+- auth bypass
+- RCE
+- destructive SQL injection exploitation
+- security-control bypasses
+
+============================================================
+3. PRIMARY OBJECTIVE
+============================================================
+
+Find the EXACT technical reason the Web GUI gets stuck at:
+
+    Initializing...
+
+Do not stop at a generic explanation such as:
+
+    "frontend issue"
+    "backend issue"
+    "scanner timeout"
+
+Trace the complete runtime path and identify the FIRST point
+where expected behavior diverges.
+
+============================================================
+4. REQUIRED INVESTIGATION ORDER
+============================================================
+
+PHASE 1 — KNOWN-GOOD DEFENSIVE TERMINAL BASELINE
+
+Verify the already-known working flow:
+
+Terminal
+→ Defensive mode
+→ Python scanner
+→ ScannerEngine
+→ stages
+→ final result
+
+Capture:
+
+- exact command
+- Python interpreter
+- working directory
+- arguments
+- target
+- mode
+- stdout
+- stderr
+- exit code
+- result JSON
+- ===NAYVISTA_RESULT===
+- final assessment status
+
+Do not modify the scanner.
+
+------------------------------------------------------------
+
+PHASE 2 — BROKEN DEFENSIVE WEB FLOW
+
+Run:
+
+Web GUI
+→ DEFENSIVE / SAFE
+→ real test target
+
+Trace:
+
+Browser
+↓
+Frontend ScanForm
+↓
+HTTP API request
+↓
+Backend route
+↓
+Scan creation
+↓
+Database
+↓
+scannerService
+↓
+Python subprocess
+↓
+ScannerEngine
+↓
+progress
+↓
+final result
+↓
+backend parser
+↓
+database update
+↓
+frontend polling/SSE
+↓
+ScanProgress
+↓
+results UI
+
+Identify the FIRST divergence from the working terminal flow.
+
+------------------------------------------------------------
+
+PHASE 3 — ACTIVE WEB FLOW
+
+Then separately investigate:
+
+Web GUI
+→ ACTIVE / AUTHORIZED TESTING
+
+Verify:
+
+- selected mode
+- authorized flag
+- backend validation
+- scanner arguments
+- Active runner
+- Active modules
+- progress
+- final result
+- DB lifecycle
+- frontend state handling
+
+Do NOT assume Active terminal works.
+
+If needed, explicitly report:
+
+    "Active terminal has not yet been independently verified."
+
+============================================================
+5. BROWSER NETWORK INVESTIGATION
+============================================================
+
+Use the actual browser Network tab.
+
+For a stuck Defensive Web scan capture:
+
+- request URL
+- HTTP method
+- request payload
+- response status
+- response headers
+- response body
+- scanId
+- subsequent polling requests
+- polling URL
+- polling status codes
+- polling response body
+- polling frequency
+- SSE/websocket behavior if applicable
+
+Determine whether:
+
+1. scan creation fails
+2. scan creation succeeds but scanId is lost
+3. scanId exists but polling never starts
+4. polling starts but receives errors
+5. backend stays at INITIALIZING
+6. backend reaches RUNNING but frontend does not know
+7. backend reaches COMPLETED but frontend still displays Initializing
+8. frontend receives malformed/empty/non-JSON data
+9. frontend state transition fails
+
+Do not guess.
+Use actual runtime evidence.
+
+============================================================
+6. FRONTEND STATE MACHINE
+============================================================
+
+Inspect:
+
+- ScanForm.tsx
+- ScanProgress.tsx
+- API client
+- polling/SSE hooks
+- scan state management
+- loading state
+- scanId state
+- progress state
+- result state
+- error state
+
+Trace:
+
+submit
+→ createScan()
+→ response
+→ scanId
+→ setScanId()
+→ progress tracking
+→ status updates
+→ terminal state
+→ stop loading
+
+Look for:
+
+- missing await
+- unresolved Promise
+- missing finally
+- undefined scanId
+- incorrect response property
+- wrong API response schema
+- wrong status enum
+- stale React state
+- broken useEffect dependency
+- polling never starting
+- polling running forever
+- polling stopping too early
+- loading flag never reset
+- error swallowed
+- malformed JSON handling
+- empty response handling
+- frontend/backend naming mismatch
+- camelCase vs snake_case mismatch
+
+============================================================
+7. BACKEND SCAN LIFECYCLE
+============================================================
+
+Inspect:
+
+- routes/scans.ts
+- scannerService.ts
+- scan controller/service
+- DB update logic
+- scan status endpoint
+- progress endpoint
+- result endpoint
+- SSE/websocket implementation if present
+
+Trace the real lifecycle:
+
+CREATED
+→ INITIALIZING
+→ RUNNING
+→ COMPLETED
+
+or:
+
+CREATED
+→ INITIALIZING
+→ COMPLETED_WITH_LIMITATIONS
+
+or:
+
+CREATED
+→ INITIALIZING
+→ FAILED
+
+Determine the actual state of a stuck scan.
+
+If DB remains:
+
+    INITIALIZING
+
+find exactly why it never transitions.
+
+Investigate:
+
+- async function never awaited
+- scanner task never started
+- detached process
+- rejected Promise
+- subprocess crash
+- stdout deadlock
+- stderr deadlock
+- result parser failure
+- DB update failure
+- exception swallowed
+- worker/task not scheduled
+- process never exits
+
+============================================================
+8. PYTHON SUBPROCESS COMPARISON
+============================================================
+
+This is CRITICAL.
+
+Compare the exact runtime environment of:
+
+WORKING:
+
+    Terminal → Defensive
+
+against:
+
+BROKEN:
+
+    Web → scannerService → Python
+
+Compare:
+
+- Python executable
+- virtual environment
+- PATH
+- working directory
+- script path
+- arguments
+- target URL
+- mode
+- authorization
+- modules
+- environment variables
+- stdin
+- stdout
+- stderr
+- buffering
+- encoding
+- process creation
+- process timeout
+
+Capture the EXACT subprocess command used by Web.
+
+Do not assume it is identical to terminal.
+
+============================================================
+9. STDOUT / STDERR / RESULT PROTOCOL
+============================================================
+
+NayVista Shield uses:
+
+    ===NAYVISTA_RESULT===
+
+Investigate the entire protocol.
+
+Verify:
+
+- Python emits progress
+- Python emits final delimiter
+- final JSON is valid
+- backend reads stdout correctly
+- stderr does not corrupt stdout
+- buffering does not hide output
+- backend does not wait forever for EOF
+- parser correctly finds the delimiter
+- parser correctly parses result JSON
+- process exits
+- exit code is captured
+
+Check whether a continuous progress stream can block
+the final result.
+
+============================================================
+10. DEFENSIVE SCANNER TARGET LIMITATIONS
+============================================================
+
+The scanner must not hang forever because a target is slow or unavailable.
+
+Target-side problems should become:
+
+    COMPLETED_WITH_LIMITATIONS
+
+where appropriate.
+
+Examples:
+
+- DNS failure
+- connection timeout
+- connection refused
+- TLS failure
+- 403
+- 429
+- 5xx
+- slow response
+- crawler timeout
+- crawl budget exceeded
+
+These must NOT produce:
+
+    Initializing forever
+
+Verify that the backend receives and persists the appropriate
+terminal assessment state.
+
+============================================================
+11. ACTIVE MODE VALIDATION
+============================================================
+
+For Web Active mode verify the entire chain:
+
+Frontend:
+
+    mode = active
+    authorized = true
+
+Backend:
+
+    accepts active only when authorized = true
+
+scannerService:
+
+    passes correct flags
+
+Python:
+
+    --mode active
+    --authorized
+
+ScannerEngine:
+
+    routes to Active runner
+
+Active runner:
+
+    executes bounded authorized modules
+
+Result:
+
+    same shared finding/report model
+
+Check for mismatches such as:
+
+    active
+    ACTIVE
+    ACTIVE_TEST
+    attack
+    attack_simulation
+
+Do NOT change behavior during investigation.
+
+============================================================
+12. ACTIVE MODULE CONTEXT
+============================================================
+
+The Active implementation currently contains bounded modules such as:
+
+- recon
+- network
+- TLS
+- HTTP security
+- cookies
+- endpoint discovery
+- API security
+- auth review
+- access control
+- CORS
+- infrastructure
+- information exposure
+- HTTP behavior
+- correlation
+
+These are intended for authorized, non-destructive validation.
+
+Do not rewrite these modules as part of this investigation.
+
+The current question is whether the Web execution pipeline
+can successfully invoke and complete them.
+
+============================================================
+13. DATABASE INVESTIGATION
+============================================================
+
+For one stuck Web Defensive scan inspect:
+
+- scanId
+- target
+- mode
+- authorized
+- status
+- createdAt
+- startedAt
+- updatedAt
+- completedAt
+- progress
+- error
+- limitations
+- result
+
+Determine the exact final observed DB state.
+
+Example:
+
+CREATED
+→ INITIALIZING
+→ ???
+
+or:
+
+CREATED
+→ INITIALIZING
+→ RUNNING
+→ ???
+
+Show the missing transition.
+
+============================================================
+14. TIMEOUT / WATCHDOG AUDIT
+============================================================
+
+Inspect all timeout layers:
+
+Frontend timeout
+Backend request timeout
+ScannerService timeout
+Python process timeout
+Global scanner timeout
+Stage timeout
+HTTP connect timeout
+HTTP read timeout
+Crawler timeout
+
+Find contradictory or missing timeout behavior.
+
+Critical question:
+
+Can ANY code path leave a scan permanently in:
+
+    INITIALIZING
+
+?
+
+If yes, identify that exact path.
+
+============================================================
+15. ERROR HANDLING AUDIT
+============================================================
+
+Search for swallowed exceptions such as:
+
+    catch (...) { }
+
+    return null
+
+    console.error(...)
+    without status update
+
+    Promise rejection without handler
+
+    process error without DB update
+
+Any internal failure must eventually become:
+
+    FAILED
+
+with a safe error message.
+
+Any target-side limitation should become:
+
+    COMPLETED_WITH_LIMITATIONS
+
+not an infinite loader.
+
+============================================================
+16. PROGRESS TELEMETRY
+============================================================
+
+Trace:
+
+Python
+→ scannerService
+→ backend
+→ DB/API/SSE
+→ frontend
+→ ScanProgress.tsx
+
+Determine whether:
+
+- Python never emits progress
+- backend does not receive progress
+- backend does not persist progress
+- API does not expose progress
+- frontend does not poll
+- frontend polls wrong endpoint
+- frontend parses wrong schema
+- frontend ignores valid progress
+- frontend never receives terminal status
+
+No fake progress should be introduced.
+
+============================================================
+17. RESULT SCHEMA PARITY
+============================================================
+
+Compare actual terminal Defensive JSON against what the Web backend
+and frontend expect.
+
+Check fields including:
+
+- assessment_status
+- posture
+- security_score
+- coverage
+- stage_status
+- limitations
+- dns
+- network_exposure
+- findings
+- structured_evidence
+- scan_id
+
+Check:
+
+- snake_case vs camelCase
+- null values
+- empty arrays
+- optional fields
+- nested result structure
+- status enums
+- missing properties
+
+Report every actual mismatch.
+
+============================================================
+18. CLI / WEB ARCHITECTURE PARITY
+============================================================
+
+Expected architecture:
+
+CLI
+ ↓
+ScannerEngine
+
+WEB
+ ↓
+scannerService
+ ↓
+ScannerEngine
+
+Verify this from actual code and runtime behavior.
+
+Do not rely only on filenames.
+
+Determine whether Web accidentally uses:
+
+- a different script
+- different Python interpreter
+- different environment
+- different arguments
+- different result parser
+- different execution path
+
+============================================================
+19. REAL TARGET VS MOCK TARGET
+============================================================
+
+Test/trace both where possible:
+
+A. known-good/mock target
+B. real reachable HTTPS target
+
+Determine whether the hang occurs:
+
+- before target connection
+- during DNS
+- during HTTP
+- during scanning
+- during result generation
+- after scanner completion
+- only when processing real target responses
+
+If real target failure occurs, it must be represented as
+COMPLETED_WITH_LIMITATIONS rather than an infinite loader.
+
+============================================================
+20. DO NOT IMPLEMENT
+============================================================
+
+Absolutely DO NOT:
+
+- modify code
+- rewrite scanner
+- rewrite frontend
+- rewrite backend
+- remove SSRF protections
+- remove request limits
+- remove timeouts
+- bypass target 429 handling
+- disable cancellation
+- add exploit functionality
+- add brute force
+- add credential attacks
+- add destructive requests
+- add unauthorized testing behavior
+
+Temporary logging/instrumentation is allowed ONLY if required to
+observe the runtime path, and must not alter scanner behavior.
+
+============================================================
+21. REQUIRED FINAL REPORT
+============================================================
+
+Return exactly this structure:
+
+# NAYVISTA SHIELD
+# WEB "INITIALIZING..." ROOT CAUSE REPORT
+
+## 1. VERIFIED BASELINE
+
+Terminal Defensive:
+    WORKING / NOT WORKING
+
+Terminal Active:
+    VERIFIED / NOT VERIFIED
+
+Web Defensive:
+    WORKING / STUCK
+
+Web Active:
+    WORKING / STUCK
+
+## 2. DEFENSIVE WEB EXECUTION TRACE
+
+Show the actual path:
+
+Browser
+↓
+Frontend
+↓
+Backend
+↓
+ScannerService
+↓
+Python
+↓
+ScannerEngine
+↓
+Result
+↓
+DB
+↓
+Frontend
+
+Mark every successful step.
+
+Mark the FIRST failed/diverged step with:
+
+    <<< FIRST DIVERGENCE >>>
+
+## 3. ACTIVE WEB EXECUTION TRACE
+
+Same structure.
+
+Clearly state whether Active scanner execution itself
+was reached or the process failed before reaching it.
+
+## 4. TERMINAL VS WEB COMPARISON
+
+| Component | Terminal Defensive | Web Defensive |
+|-----------|--------------------|---------------|
+| Python | | |
+| Working dir | | |
+| Command | | |
+| Arguments | | |
+| Environment | | |
+| Scanner start | | |
+| Progress | | |
+| Result delimiter | | |
+| Result parsing | | |
+| DB | N/A | |
+| Frontend | N/A | |
+
+## 5. PRIMARY ROOT CAUSE
+
+PRIMARY ROOT CAUSE:
+
+<exact cause>
+
+FILE:
+
+<path>
+
+FUNCTION:
+
+<function>
+
+LINE/RANGE:
+
+<line or range>
+
+FIRST BROKEN STEP:
+
+<exact step>
+
+WHY:
+
+<technical explanation>
+
+## 6. SECONDARY ISSUES
+
+Only list issues actually discovered.
+
+## 7. TARGET LIMITATION HANDLING
+
+Explain whether DNS/timeout/403/429/5xx/TLS/slow target
+properly reaches:
+
+    COMPLETED_WITH_LIMITATIONS
+
+or can currently leave:
+
+    INITIALIZING
+
+## 8. ACTIVE MODE STATUS
+
+State clearly:
+
+- Web mode value:
+- authorized flag:
+- Backend validation:
+- Python arguments:
+- Active runner reached:
+- Active modules reached:
+- Final result reached:
+
+Do NOT claim Terminal Active works unless independently verified.
+
+## 9. MINIMAL SAFE FIX PLAN
+
+Provide the smallest architectural fix.
+
+DO NOT implement it.
+
+## 10. REQUIRED REGRESSION TESTS
+
+After implementation, tests must verify:
+
+1. Terminal Defensive still works
+2. Web Defensive completes
+3. Web Active Authorized completes
+4. Active authorization gate works
+5. Backend failure → FAILED
+6. DNS failure → COMPLETED_WITH_LIMITATIONS
+7. timeout → COMPLETED_WITH_LIMITATIONS
+8. 403 → appropriate limitation state
+9. 429 → bounded handling
+10. 5xx → appropriate limitation state
+11. frontend stops loading
+12. polling stops at terminal state
+13. result JSON parses correctly
+14. DB status reaches terminal state
+15. CLI/Web result parity remains intact
+
+============================================================
+FINAL REQUIREMENT
+============================================================
+
+Do not guess.
+
+Do not assume Active terminal works.
+
+The ONLY confirmed working baseline is:
+
+    TERMINAL → DEFENSIVE / SAFE → WORKING
+
+The confirmed Web problem is:
+
+    WEB → DEFENSIVE / SAFE → INITIALIZING FOREVER
+
+and:
+
+    WEB → ACTIVE / AUTHORIZED → INITIALIZING FOREVER
+
+Therefore FIRST solve the mystery of:
+
+    TERMINAL DEFENSIVE WORKS
+              VS
+    WEB DEFENSIVE HANGS
+
+Then separately trace Active Web.
+
+Find the FIRST broken link in the real runtime chain.
+
+INVESTIGATION ONLY.
+NO FIX IMPLEMENTATION.
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-09-10T19:59:50+05:30.
+</ADDITIONAL_METADATA>

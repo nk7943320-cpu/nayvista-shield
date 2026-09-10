@@ -1,0 +1,104 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_TYPE=api
+      - PORT=5000
+      - HOST=0.0.0.0
+      - DATABASE_URL=postgresql://nayvista:nayvista_secure_pass@postgres:5432/nayvista_shield
+      - REDIS_URL=redis://redis:6379
+      - MAX_CONCURRENT_SCANS=3
+      - SCAN_TIMEOUT_MS=120000
+      - ALLOW_LOCAL_TARGETS=false
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - nayvista-net
+
+  worker:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    command: ["node", "dist/worker.js"]
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - SERVICE_TYPE=worker
+      - PYTHON_BIN=/opt/venv/bin/python3
+      - DATABASE_URL=postgresql://nayvista:nayvista_secure_pass@postgres:5432/nayvista_shield
+      - REDIS_URL=redis://redis:6379
+      - MAX_CONCURRENT_SCANS=3
+      - SCAN_TIMEOUT_MS=120000
+      - ALLOW_LOCAL_TARGETS=false
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - nayvista-net
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - nayvista-net
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=nayvista
+      - POSTGRES_PASSWORD=nayvista_secure_pass
+      - POSTGRES_DB=nayvista_shield
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nayvista -d nayvista_shield"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - nayvista-net
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - nayvista-net
+
+volumes:
+  pgdata:
+  redisdata:
+
+networks:
+  nayvista-net:
+    driver: bridge

@@ -1,0 +1,174 @@
+<USER_REQUEST>
+NAYVISTA SHIELD
+WEB SCAN "INITIALIZING..." HANG
+MASTER INVESTIGATION PROMPT
+============================================================
+
+ROLE:
+You are investigating a production-style web assessment application
+called NayVista Shield.
+
+IMPORTANT:
+THIS IS AN INVESTIGATION-ONLY TASK.
+
+DO NOT IMPLEMENT ANY FIX YET.
+
+Do not rewrite the scanner.
+Do not rewrite Active modules.
+Do not remove security controls.
+Do not add exploit functionality.
+
+Your job is to reproduce, trace, compare, identify the FIRST broken
+component, determine the root cause, and provide a minimal safe fix plan.
+
+============================================================
+1. CURRENT VERIFIED STATUS
+============================================================
+
+The following facts are confirmed:
+
+A. TERMINAL — DEFENSIVE / SAFE
+   ✅ VERIFIED WORKING.
+
+B. TERMINAL — ACTIVE / AUTHORIZED TESTING
+   ⚠️ NOT YET VERIFIED.
+   Do NOT assume it works.
+   Do NOT report it as working unless actually tested.
+
+C. WEB GUI — DEFENSIVE / SAFE
+   ❌ Gets stuck indefinitely at:
+
+      Initializing...
+
+D. WEB GUI — ACTIVE / AUTHORIZED TESTING
+   ❌ Also gets stuck at:
+
+      Initializing...
+
+Therefore the primary investigation target is:
+
+    WHY DOES THE WEB GUI REMAIN AT "INITIALIZING..."?
+
+The strongest known-good baseline is:
+
+    TERMINAL → DEFENSIVE → WORKS
+
+The strongest broken baseline is:
+
+    WEB → DEFENSIVE → INITIALIZING FOREVER
+
+Use this comparison FIRST.
+
+============================================================
+2. ACTIVE / AUTHORIZED TESTING CONTEXT
+============================================================
+
+NayVista Shield supports:
+
+[01] DEFENSIVE / SAFE
+
+[02] ACTIVE / AUTHORIZED TESTING
+
+Active mode is intended for bounded, authorized, non-destructive
+security validation.
+
+Current Active description:
+
+ACTIVE / AUTHORIZED TESTING [ACTIVE]
+
+Bounded active validation:
+- HTTP behavior
+- TLS strength
+- CORS
+- API security
+- authent
+<truncated 15233 bytes>
+ues actually discovered.
+
+## 7. TARGET LIMITATION HANDLING
+
+Explain whether DNS/timeout/403/429/5xx/TLS/slow target
+properly reaches:
+
+    COMPLETED_WITH_LIMITATIONS
+
+or can currently leave:
+
+    INITIALIZING
+
+## 8. ACTIVE MODE STATUS
+
+State clearly:
+
+- Web mode value:
+- authorized flag:
+- Backend validation:
+- Python arguments:
+- Active runner reached:
+- Active modules reached:
+- Final result reached:
+
+Do NOT claim Terminal Active works unless independently verified.
+
+## 9. MINIMAL SAFE FIX PLAN
+
+Provide the smallest architectural fix.
+
+DO NOT implement it.
+
+## 10. REQUIRED REGRESSION TESTS
+
+After implementation, tests must verify:
+
+1. Terminal Defensive still works
+2. Web Defensive completes
+3. Web Active Authorized completes
+4. Active authorization gate works
+5. Backend failure → FAILED
+6. DNS failure → COMPLETED_WITH_LIMITATIONS
+7. timeout → COMPLETED_WITH_LIMITATIONS
+8. 403 → appropriate limitation state
+9. 429 → bounded handling
+10. 5xx → appropriate limitation state
+11. frontend stops loading
+12. polling stops at terminal state
+13. result JSON parses correctly
+14. DB status reaches terminal state
+15. CLI/Web result parity remains intact
+
+============================================================
+FINAL REQUIREMENT
+============================================================
+
+Do not guess.
+
+Do not assume Active terminal works.
+
+The ONLY confirmed working baseline is:
+
+    TERMINAL → DEFENSIVE / SAFE → WORKING
+
+The confirmed Web problem is:
+
+    WEB → DEFENSIVE / SAFE → INITIALIZING FOREVER
+
+and:
+
+    WEB → ACTIVE / AUTHORIZED → INITIALIZING FOREVER
+
+Therefore FIRST solve the mystery of:
+
+    TERMINAL DEFENSIVE WORKS
+              VS
+    WEB DEFENSIVE HANGS
+
+Then separately trace Active Web.
+
+Find the FIRST broken link in the real runtime chain.
+
+INVESTIGATION ONLY.
+NO FIX IMPLEMENTATION.
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-09-10T19:59:50+05:30.
+</ADDITIONAL_METADATA>
